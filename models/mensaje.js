@@ -16,7 +16,13 @@ let mensajeSchema = new mongoose.Schema({
         required: true,
         trim: true,
         match: /^\d{9}$/
-    }
+    },
+    respuestas: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'mensaje',
+        trim: true,
+        match: /^\d{9}$/
+    }]
 });
 
 let Mensaje = mongoose.model('mensaje', mensajeSchema);

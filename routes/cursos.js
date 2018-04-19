@@ -11,16 +11,8 @@ const Apartado = require('../models/apartado');
 
 const constantes = require('../constantes');
 
-//Obtener cursos
-router.get('/', (req, res) => {
-    Curso.find().then( 
-        resultado => res.send({ok: true, result: resultado}),
-        error => res.send({ok: false, error: error})
-    );
-});
-
 //Creacion del curso
-router.post('/', passport.authenticate('jwt', {session: false}), (req, res) => {
+router.post('/', (req, res) => {
     let curso = new Curso({
         titulo: req.body.titulo,
         creador: req.user.id
@@ -61,7 +53,7 @@ router.post('/temas/apartados/:id', (req, res) => {
 })
 
 //Creacion de tema y añadido al curso
-router.post('/:id/temas', passport.authenticate('jwt', {session: false}), (req, res) => {
+router.post('/:id/temas', (req, res) => {
     let tema = new Tema({
         titulo: req.body.titulo,
         descripcion: req.body.descripcion
@@ -97,8 +89,5 @@ router.get('/:id', (req, res) => {
         error => res.send({ok: false, error: error})
     )
 })
-
-
-
 
 module.exports = router;

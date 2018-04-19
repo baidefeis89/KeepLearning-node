@@ -11,6 +11,12 @@ let cursoSchema = new mongoose.Schema({
         ref: 'usuario',
         required: true
     },
+    descripcion: {
+        type: String,
+        required: true,
+        trim: true,
+        minlength: 10
+    },
     temas: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'tema',

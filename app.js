@@ -9,8 +9,10 @@ const cors = require('cors');
 
 const CONSTANTES = require('./constantes');
 
+const index = require('./routes/index');
 const usuarios = require('./routes/usuarios');
 const cursos = require('./routes/cursos');
+const temas = require('./routes/temas');
 const mensajes = require('./routes/mensajes');
 
 mongoose.Promise = global.Promise;
@@ -36,8 +38,10 @@ app.use(bodyParser.json());
 
 app.use(express.static(__dirname + '/public'));
 
-app.use('/usuarios', usuarios);
-app.use('/cursos', cursos);
+app.use('/', index);
+app.use('/temas', temas);
+app.use('/usuarios', passport.authenticate('jwt', {session: false}), usuarios);
+app.use('/cursos', passport.authenticate('jwt', {session: false}), cursos);
 app.use('/mensajes', passport.authenticate('jwt', {session: false}), mensajes);
 
 app.use( (req, res, next) => {

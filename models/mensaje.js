@@ -1,23 +1,23 @@
 const mongoose = require('mongoose');
 
 let mensajeSchema = new mongoose.Schema({
-    asunto: {
+    subject: {
         type: String,
         required: true,
         trim: true
     },
-    texto: {
+    text: {
         type: String,
         required: true,
         trim: true
     },
-    creador: {
+    creator: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         trim: true,
         match: /^\d{9}$/
     },
-    respuestas: [{
+    responses: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'mensaje',
         trim: true,

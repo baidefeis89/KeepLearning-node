@@ -78,8 +78,20 @@ router.post('/:id/temas', passport.authenticate('jwt', {session: false}), (req, 
     )
 })
 
-//Obtener temas de un curso
 router.get('/:id/temas', (req, res) => {
+    (async () => {
+        const curso = await Curso.findById(req.params.id);
+        curso.temas = await Promise.all(
+            curso.temas.map( tema => Tema.findById(tema).populate('apartados') )
+        );
+
+        res.send({ok: true, result: curso});
+
+    })().catch( err => res.send({ok: false, error: err}))
+})
+
+//Obtener temas de un curso
+router.get('/:id', (req, res) => {
     Curso.findById(req.params.id).populate('temas').then(
         resultado => res.send({ok: true, result: resultado}),
         error => res.send({ok: false, error: error})

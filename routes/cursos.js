@@ -42,13 +42,21 @@ router.get('/temas/apartados/:id', (req, res) => {
 
 //Crear apartado y añadirlo a un tema
 router.post('/temas/apartados/:id', (req, res) => {
+    let fileName = null;
     
-    //TODO implementar subida de video
+    if (req.files) {
+        fileName = new Date().getTime() + '.' + req.files.video.mimetype.split('/')[1];
+        
+        req.files.video.mv('./public/uploads/' + fileName, error => {
+            if (error) console.log('Error:', error);
+        })
+    }
+
     let apartado = new Apartado({
         titulo: req.body.titulo,
-        video: req.body.video
-    })
-
+        video: fileName ? fileName : null
+    });
+    
     apartado.save().then(
         resultado => {
             Tema.findByIdAndUpdate(req.params.id, {"$push": {apartados: apartado.id}}).then(
@@ -78,8 +86,19 @@ router.post('/:id/temas', passport.authenticate('jwt', {session: false}), (req, 
     )
 })
 
-//Obtener temas de un curso
 router.get('/:id/temas', (req, res) => {
+    (async () => {
+        const curso = await Curso.findById(req.params.id);
+        curso.temas = await Promise.all(
+            curso.temas.map( tema => Tema.findById(tema).populate('apartados') )
+        )
+        
+        res.send({ok: true, result:curso})
+    })()
+})
+
+//Obtener temas de un curso
+router.get('/:id', (req, res) => {
     Curso.findById(req.params.id).populate('temas').then(
         resultado => res.send({ok: true, result: resultado}),
         error => res.send({ok: false, error: error})

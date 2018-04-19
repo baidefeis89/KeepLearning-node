@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 let apartadoSchema = new mongoose.Schema({
-    titulo: {
+    title: {
         type: String,
         required: true,
         trim: true

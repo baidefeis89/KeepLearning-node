@@ -31,13 +31,13 @@ router.post('auth/login', (req, res) => {
 router.post('auth/registro', (req, res) => {
     if (!req.body.email) res.send({ok: false, error: 'El email es obligatorio'});
     else if (!req.body.password) res.send({ok: false, error: 'La contraseña es obligatoria'});
-    else if (!req.body.nombre) res.send({ok: false, error: 'El nombre es obligatorio'});
-    else if (!req.body.apellidos) res.send({ok: false, error: 'El apellido es obligatorio'});
+    else if (!req.body.name) res.send({ok: false, error: 'El nombre es obligatorio'});
+    else if (!req.body.surname) res.send({ok: false, error: 'El apellido es obligatorio'});
     else {
         let usuario = new Usuario({
             email: req.body.email,
-            nombre: req.body.nombre,
-            apellidos: req.body.apellidos,
+            name: req.body.nombre,
+            surname: req.body.apellidos,
             password: req.body.password
         });
 

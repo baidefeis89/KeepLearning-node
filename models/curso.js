@@ -1,23 +1,23 @@
 const mongoose = require('mongoose');
 
 let cursoSchema = new mongoose.Schema({
-    titulo: {
+    title: {
         type: String,
         required: true,
         trim: true
     },
-    creador: {
+    creator: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'usuario',
         required: true
     },
-    descripcion: {
+    description: {
         type: String,
         required: true,
         trim: true,
         minlength: 10
     },
-    temas: [{
+    topics: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'tema',
         trim: true,

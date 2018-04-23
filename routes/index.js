@@ -34,7 +34,9 @@ router.post('/auth/login', (req, res) => {
 
 router.post('/auth/registro', (req, res) => {
     if (!req.body.email) res.send({ok: false, error: 'El email es obligatorio'});
+    else if (req.body.email != req.body.email2) res.send({ok: false, error: 'Los emails deben ser iguales'})
     else if (!req.body.password) res.send({ok: false, error: 'La contraseña es obligatoria'});
+    else if (req.body.password !== req.body.password2) res.send({ok: false, error: 'Las contraseñas deben ser iguales'})
     else if (!req.body.name) res.send({ok: false, error: 'El nombre es obligatorio'});
     else if (!req.body.surname) res.send({ok: false, error: 'El apellido es obligatorio'});
     else {
@@ -50,7 +52,11 @@ router.post('/auth/registro', (req, res) => {
            
             usuario.save().then(
                 resultado => res.send({ok: true, token: generarToken(resultado.id)}),
-                error => res.send({ok: false, error: error})   
+                error => {
+                    if (error.code == 11000) res.send({ok: false, error: 'Ese email ya está registrado'})
+                    else res.send({ok: false, error: error})
+                }
+                   
             )
             
         })

@@ -10,7 +10,13 @@ let apartadoSchema = new mongoose.Schema({
         type: String,
         required: false,
         trim: true
-    }
+    },
+    messages: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'mensaje',
+        trim: true,
+        match: /^\d{9}$/
+    }]
 });
 
 let Apartado = mongoose.model('apartado', apartadoSchema);

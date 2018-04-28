@@ -13,11 +13,24 @@ const constantes = require('../constantes');
 
 //Creacion del curso
 router.post('/', (req, res) => {
-    let curso = new Curso({
+    let fileName = null;
+    
+    const curso = new Curso({
         title: req.body.title,
         description: req.body.description,
-        creator: req.user.id
+        creator: req.user.id,
+        image: ''
     })
+
+    if (req.files) {
+        fileName = new Date().getTime() + '.' + req.files.image.mimetype.split('/')[1];
+        
+        req.files.image.mv('./public/uploads/' + fileName, error => {
+            if (error) console.log('Error:', error);
+        })
+    }
+
+    curso.image = fileName ? fileName : 'default.jpg';
 
     curso.save().then(
         resultado => res.send({ok: true}),

@@ -14,8 +14,11 @@ const constantes = require('../constantes');
 
 //Obtener tema
 router.get('/apartados/:id', (req, res) => {
-    Tema.findById(req.params.id).populate('paragraphs').then(
-        resultado => res.send({ok: true, result: resultado.paragraphs}),
+    Apartado.findById(req.params.id).then(
+        resultado => {
+            if (resultado != null) res.send({ok: true, result: resultado})
+            else res.send({ok: true, result: {}})
+        },
         error => res.send({ok: false, error: error})
     )
 })

@@ -15,6 +15,13 @@ router.get('/cursos', (req, res) => {
     )
 })
 
+router.get('/auth/token', (req, res) => {
+    let token = req.headers['authorization'];
+
+    if (checkToken(token)) res.send({ok: true});
+    else res.send({ok: false});
+})
+
 router.post('/auth/login', (req, res) => {
     if (!req.body.email || !req.body.password) 
         res.send({ok: false, error: 'Nombre de usuario y contraseña requerido'})
@@ -69,4 +76,13 @@ module.exports = router;
 function generarToken(id) {
     let token = jwt.sign({id: id}, constantes.secreto, {expiresIn: '1 day'});
     return token;
+}
+
+function checkToken(token) {
+    try {
+        jwt.verify(token.split(' ')[1], constantes.secreto);
+        return true;
+    } catch (e) {
+        return false;
+    }
 }

@@ -18,15 +18,20 @@ router.get('/:id', (req, res) => {
     Apartado.findById(req.params.id).populate({
         path: 'messages',
         model: 'mensaje',
-        populate: {
-          path: 'responses',
-          model: 'mensaje',
-        },
-        populate: {
+        populate: [{
             path: 'creator',
             select: 'name surname',
             model: 'usuario'
-        }
+        },
+        {
+            path: 'responses',
+            model: 'mensaje',
+            populate: {
+                path: 'creator',
+                select: 'name surname',
+                model: 'usuario'   
+            }
+        }]
     }).then(
         resultado => {
             if (resultado != null) res.send({ok: true, result: resultado})

@@ -47,11 +47,22 @@ router.post('/auth/registro', (req, res) => {
     else if (!req.body.name) res.send({ok: false, error: 'El nombre es obligatorio'});
     else if (!req.body.surname) res.send({ok: false, error: 'El apellido es obligatorio'});
     else {
+        let fileName = null;
+    
+        if (req.files) {
+            fileName = new Date().getTime() + '.' + req.files.avatar.mimetype.split('/')[1];
+            
+            req.files.avatar.mv('./public/img/' + fileName, error => {
+                if (error) console.log('Error:', error);
+            })
+        }else fileName = "profile-default.jpg";
+
         let usuario = new Usuario({
             email: req.body.email,
             name: req.body.name,
             surname: req.body.surname,
-            password: req.body.password
+            password: req.body.password,
+            avatar: fileName
         });
 
         bcrypt.hash(req.body.password, constantes.saltRounds).then( resultado => {

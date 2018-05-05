@@ -22,6 +22,11 @@ let usuarioSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    avatar: {
+        type: String,
+        required: false,
+        trim: true
+    },
     courses: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'curso'

@@ -20,7 +20,7 @@ router.get('/:id', (req, res) => {
         model: 'mensaje',
         populate: [{
             path: 'creator',
-            select: 'name surname',
+            select: 'name surname avatar',
             model: 'usuario'
         },
         {
@@ -28,7 +28,7 @@ router.get('/:id', (req, res) => {
             model: 'mensaje',
             populate: {
                 path: 'creator',
-                select: 'name surname',
+                select: 'name surname avatar',
                 model: 'usuario'   
             }
         }]

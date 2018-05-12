@@ -27,6 +27,7 @@ let usuarioSchema = new mongoose.Schema({
         required: false,
         trim: true
     },
+    admin: Boolean,
     courses: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'curso'

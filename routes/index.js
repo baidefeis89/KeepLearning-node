@@ -27,12 +27,13 @@ router.post('/auth/login', (req, res) => {
         res.send({ok: false, error: 'Nombre de usuario y contraseña requerido'})
     else {
         Usuario.findOne({email: req.body.email}).then( resultado => {
+            console.log(resultado);
             if (!resultado) {
                 res.send({ok: false, error: 'Nombre de usuario o contraseña incorrecto'})
                 return;
             }
             bcrypt.compare(req.body.password, resultado.password).then( response => {
-                if (response) res.send({ok: true, token: generarToken(resultado.id)});
+                if (response) res.send({ok: true, token: generarToken(resultado.id, resultado.admin)});
                 else res.send({ok: false, error: 'Nombre de usuario o contraseña incorrecto'});
             })
         })
@@ -62,14 +63,15 @@ router.post('/auth/registro', (req, res) => {
             name: req.body.name,
             surname: req.body.surname,
             password: req.body.password,
-            avatar: fileName
+            avatar: fileName,
+            admin: false
         });
 
         bcrypt.hash(req.body.password, constantes.saltRounds).then( resultado => {
             usuario.password = resultado;
            
             usuario.save().then(
-                resultado => res.send({ok: true, token: generarToken(resultado.id)}),
+                resultado => res.send({ok: true, token: generarToken(resultado.id, resultado.admin)}),
                 error => {
                     if (error.code == 11000) res.send({ok: false, error: 'Ese email ya está registrado'})
                     else res.send({ok: false, error: error})
@@ -84,8 +86,8 @@ router.post('/auth/registro', (req, res) => {
 
 module.exports = router;
 
-function generarToken(id) {
-    let token = jwt.sign({id: id}, constantes.secreto, {expiresIn: '1 day'});
+function generarToken(id, admin) {
+    let token = jwt.sign({id: id, admin: admin}, constantes.secreto, {expiresIn: '1 day'});
     return token;
 }
 

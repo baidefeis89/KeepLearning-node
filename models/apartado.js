@@ -16,7 +16,11 @@ let apartadoSchema = new mongoose.Schema({
         ref: 'mensaje',
         trim: true,
         match: /^\d{9}$/
-    }]
+    }],
+    visits: {
+        type: Number,
+        default: 0
+    }
 });
 
 let Apartado = mongoose.model('apartado', apartadoSchema);

@@ -15,7 +15,7 @@ const constantes = require('../constantes');
 
 //Obtener apartado
 router.get('/:id', (req, res) => {
-    Apartado.findById(req.params.id).populate({
+    Apartado.findByIdAndUpdate(req.params.id, {$inc: { visits: 1 }}).populate({
         path: 'messages',
         model: 'mensaje',
         populate: [{

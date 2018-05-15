@@ -20,7 +20,8 @@ let apartadoSchema = new mongoose.Schema({
     visits: {
         type: Number,
         default: 0
-    }
+    },
+    order: Number
 });
 
 let Apartado = mongoose.model('apartado', apartadoSchema);

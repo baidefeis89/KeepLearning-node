@@ -18,6 +18,11 @@ let temaSchema = new mongoose.Schema({
         ref: 'mensaje',
         trim: true,
         match: /^\d{9}$/
+    }],
+    order: Number,
+    extra: [{
+        title: String,
+        file: String
     }]
 });
 

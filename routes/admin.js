@@ -46,18 +46,18 @@ router.post('/course', (req, res) => {
         title: req.body.title,
         description: req.body.description,
         creator: req.user.id,
-        image: ''
+        image: 'default.jpg'
     })
 
-    if (req.files) {
-        fileName = new Date().getTime() + '.' + req.files.image.mimetype.split('/')[1];
+    // if (req.files) {
+    //     fileName = new Date().getTime() + '.' + req.files.image.mimetype.split('/')[1];
         
-        req.files.image.mv('./public/uploads/' + fileName, error => {
-            if (error) console.log('Error:', error);
-        })
-    }
+    //     req.files.image.mv('./public/uploads/' + fileName, error => {
+    //         if (error) console.log('Error:', error);
+    //     })
+    // }
 
-    curso.image = fileName ? fileName : 'default.jpg';
+    // curso.image = fileName ? fileName : 'default.jpg';
 
     curso.save().then(
         resultado => res.send({ok: true, result: resultado}),
@@ -68,9 +68,69 @@ router.post('/course', (req, res) => {
 //Update course
 router.put('/course', (req, res) => {
     //TODO implementar imagen
-    Curso.findByIdAndUpdate(req.body._id, {$set: {...req.body}}, {new: true}).then(
-        resultado => {console.log(resultado);res.send({ok: true, result: resultado})},
+    let {image, ...data} = {...req.body};
+
+    if (req.files) {
+        let fileName = new Date().getTime() + '.' + req.files.image.mimetype.split('/')[1];
+        
+        req.files.image.mv('./public/img/' + fileName, error => {
+            if (error) console.log('Error:', error);
+        })
+
+        data.image = fileName;
+    } 
+
+    Curso.findByIdAndUpdate(req.body._id, {$set: {...data}}, {new: true}).then(
+        resultado => res.send({ok: true, result: resultado}),
         error => res.send({ok:false, error: error})
+    )
+})
+
+router.put('/course/reorder', (req, res) => {
+    let data = req.body;
+    data.topics = data.topics.map( t => t._id );
+    console.log(data.topics);
+    Curso.findByIdAndUpdate(data._id, { $set: {topics: data.topics}}).then(
+        result => res.send({ok:true, result:result}),
+        error => res.send({ok:false, error: error})
+    );
+})
+
+router.put('/topic/reorder', (req, res) => {
+    let data = req.body.paragraphs.map( p => p._id );
+
+    Tema.findByIdAndUpdate(req.body._id, { $set: {paragraphs: data} }).then(
+        result => res.send({ok: true}),
+        error => res.send({ok: false, error: error})
+    )
+})
+
+router.delete('/course/:id', (req, res) => {
+    console.log('delete:',req.params.id);
+    Curso.findByIdAndRemove(req.params.id).then(
+        response => {
+            res.send({ok: true});
+            response.topics.map( t => {
+                Tema.findByIdAndRemove(t).then( tema => {
+                    tema.paragraphs.map( p => Apartado.findByIdAndRemove(p).exec() )
+                })
+            });
+        },
+        error => res.send({ok: false, error: error})
+    )
+})
+
+router.delete('/paragraph/:id', (req, res) => {
+    Apartado.findByIdAndRemove(req.params.id).then(
+        response => res.send({ok: true}),
+        error => req.send({ok: false, error: error})
+    )
+})
+
+router.delete('/topic/:id', (req, res) => {
+    Tema.findByIdAndRemove(req.params.id).then(
+        response => res.send({ok: true}),
+        error => req.send({ok: false, error: error})
     )
 })
 
@@ -117,6 +177,40 @@ router.post('/topic/:id/paragraph', (req, res) => {
                 error => res.send({ok: false, error: error})
             )
         },
+        error => res.send({ok: false, error: error})
+    )
+})
+
+//Crear apartado y añadirlo a un tema
+router.post('/topic/:id/extra', (req, res) => {
+    console.log(req.body);
+    let data;
+
+    let fileName = null;
+    
+    if (req.files) {
+        fileName = new Date().getTime() + '.' + req.files.File.mimetype.split('/')[1];
+        
+        req.files.File.mv('./public/uploads/' + fileName, error => {
+            if (error) console.log('Error:', error);
+        })
+
+        data = {
+            title: req.body.title,
+            file: fileName
+        };
+
+        Tema.findByIdAndUpdate(req.params.id, {"$push": {extra: data}}, {new: true}).then(
+            response => res.send({ok: true, result: response}),
+            error => res.send({ok: false, error: error})
+        )
+    } else res.send({ok: false, error: 'File required'});
+
+});
+
+router.delete('/topic/:idtopic/extra/:idextra', (req, res) => {
+    Tema.findByIdAndUpdate(req.params.idtopic, {"$pull": {extra: {_id: req.params.idextra}}}).then(
+        response => res.send({ok: true}),
         error => res.send({ok: false, error: error})
     )
 })

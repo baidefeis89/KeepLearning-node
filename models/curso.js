@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Topic = require('./tema');
 
 let cursoSchema = new mongoose.Schema({
     title: {
@@ -22,7 +23,12 @@ let cursoSchema = new mongoose.Schema({
         ref: 'tema',
         trim: true,
         match: /^\d{9}$/
-    }]
+    }],
+    image: {
+        type: String,
+        required: false,
+        trim: true
+    }
 });
 
 let Curso = mongoose.model('curso', cursoSchema);

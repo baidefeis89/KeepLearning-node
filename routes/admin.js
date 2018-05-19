@@ -2,6 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const passport = require('passport');
+const fs = require('fs');
 
 const router = express.Router();
 
@@ -49,16 +50,6 @@ router.post('/course', (req, res) => {
         image: 'default.jpg'
     })
 
-    // if (req.files) {
-    //     fileName = new Date().getTime() + '.' + req.files.image.mimetype.split('/')[1];
-        
-    //     req.files.image.mv('./public/uploads/' + fileName, error => {
-    //         if (error) console.log('Error:', error);
-    //     })
-    // }
-
-    // curso.image = fileName ? fileName : 'default.jpg';
-
     curso.save().then(
         resultado => res.send({ok: true, result: resultado}),
         error => res.send({ok: false, error: error})
@@ -67,7 +58,6 @@ router.post('/course', (req, res) => {
 
 //Update course
 router.put('/course', (req, res) => {
-    //TODO implementar imagen
     let {image, ...data} = {...req.body};
 
     if (req.files) {
@@ -215,5 +205,40 @@ router.delete('/topic/:idtopic/extra/:idextra', (req, res) => {
     )
 })
 
+router.get('/messages-number', (req, res) => {
+    Apartado.find().populate('messages').then(
+        response => {
+            let data = response.map( apartado => apartado.messages )
+                .filter( messages => messages.length > 0)
+                .map( x => x.filter( messages => messages.responses.length == 0))
+                .reduce( (r1, r2) =>  r1 + r2.length, 0)
 
+            res.send({ok: true, result: data})
+        },
+        error => res.send({ok: false, error: error})
+    )
+})
+
+router.get('/messages', (req, res) => {
+    Apartado.find().populate({
+        path: 'messages',
+        model: 'mensaje',
+        populate: {
+            path: 'creator',
+            select: 'name surname avatar',
+            model: 'usuario'   
+        }
+    }).then(
+        response => {
+            let data = [];
+            response.map( apartado => apartado.messages )
+                .filter( messages => messages.length > 0)
+                .map( x => x.filter( messages => messages.responses.length == 0))
+                .map( x => data.push(...x))
+                
+            res.send({ok: true, result: data})
+        },
+        error => res.send({ok: false, error: error})
+    )
+})
 module.exports = router;

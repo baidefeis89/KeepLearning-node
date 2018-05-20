@@ -10,6 +10,7 @@ const Curso = require('../models/curso');
 const Tema = require('../models/tema');
 const Apartado = require('../models/apartado');
 const Usuario = require('../models/usuario');
+const Config = require('../models/config');
 
 const constantes = require('../constantes');
 
@@ -241,4 +242,24 @@ router.get('/messages', (req, res) => {
         error => res.send({ok: false, error: error})
     )
 })
+
+router.post('/settings', (req, res) => {
+    let data = {
+        isPublic: req.body.isPublic,
+        key: req.body.key
+    }
+
+    Config.findByIdAndUpdate(req.body._id, {$set: data}).then(
+        response => res.send({ok: true, result: response}),
+        error => res.send({ok: false, error: error})
+    );
+})
+
+router.get('/settings', (req, res) => {
+    Config.find().then( 
+        response => res.send({ok: true, result: response[0]}),
+        error => res.send({ok: false, error: error})
+    )
+})
+
 module.exports = router;

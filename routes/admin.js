@@ -12,6 +12,8 @@ const Apartado = require('../models/apartado');
 const Usuario = require('../models/usuario');
 const Config = require('../models/config');
 
+const { exec } = require('child_process');
+
 const constantes = require('../constantes');
 
 //TODO implement middleware to check admin
@@ -54,6 +56,8 @@ router.post('/course', (req, res) => {
     curso.save().then(
         resultado => res.send({ok: true, result: resultado}),
         error => res.send({ok: false, error: error})
+    ).then(
+        () => exec('forever restartall', () => null)
     )
 })
 

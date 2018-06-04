@@ -16,7 +16,6 @@ const { exec } = require('child_process');
 
 const constantes = require('../constantes');
 
-//TODO implement middleware to check admin
 router.use((req, res, next) => {
     if (req.user.admin) {
         next();

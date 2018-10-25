@@ -12,17 +12,23 @@ let usuarioSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    nombre: {
+    name: {
         type: String,
         required: true,
         trim: true
     },
-    apellidos: {
+    surname: {
         type: String,
         required: true,
         trim: true
     },
-    cursos: [{
+    avatar: {
+        type: String,
+        required: false,
+        trim: true
+    },
+    admin: Boolean,
+    courses: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'curso'
     }]

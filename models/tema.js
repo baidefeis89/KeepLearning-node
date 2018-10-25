@@ -1,23 +1,28 @@
 const mongoose = require('mongoose');
 
 let temaSchema = new mongoose.Schema({
-    titulo: {
+    title: {
         type: String,
         required: true,
         trim: true
     },
-    descripcion: String,
-    apartados: [{
+    description: String,
+    paragraphs: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'apartado',
         trim: true,
         match: /^\d{9}$/
     }],
-    mensajes: [{
+    messages: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'mensaje',
         trim: true,
         match: /^\d{9}$/
+    }],
+    order: Number,
+    extra: [{
+        title: String,
+        file: String
     }]
 });
 

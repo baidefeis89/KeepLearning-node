@@ -6,21 +6,39 @@ const router = express.Router();
 
 const Mensaje = require('../models/mensaje');
 const Tema = require('../models/tema');
+const Apartado = require('../models/apartado');
+const Usuario = require('../models/usuario');
 
 //Crear mensaje
 router.post('/nuevo/:id', (req, res) => {
     let mensaje = new Mensaje({
-        asunto: req.body.asunto,
-        texto: req.body.texto,
-        creador: req.user.id
+        subject: req.body.subject,
+        text: req.body.text,
+        creator: req.user.id
     });
 
+    // mensaje.save().then(
+    //     resultado => {
+    //         Apartado.findByIdAndUpdate(req.params.id, {"$push": {messages: mensaje.id}}).then(
+    //             response => res.send({ok: true, result: resultado}),
+    //             error => res.send({ok: false, error: error})
+    //         )
+    //     },
+    //     error => res.send({ok: false, error: error})
+    // )
+
     mensaje.save().then(
-        resultado => {
-            Tema.findByIdAndUpdate(req.params.id, {"$push": {mensajes: mensaje.id}}).then(
-                response => res.send({ok: true, result: resultado}),
-                error => res.send({ok: false, error: error})
-            )
+        async resultado => {
+            await Apartado.findByIdAndUpdate(req.params.id, {"$push": {messages: mensaje.id}});
+            let user = await Usuario.findById(resultado.creator);
+            let respuesta = {...resultado._doc};
+            respuesta.creator = {
+                _id: user.id,
+                name: user.name,
+                surname: user.surname,
+                avatar: user.avatar
+            }
+            res.send({ok: true, result: respuesta});
         },
         error => res.send({ok: false, error: error})
     )
@@ -29,17 +47,30 @@ router.post('/nuevo/:id', (req, res) => {
 //Responder mensaje
 router.post('/respuestas/:id', (req, res) => {
     let mensaje = new Mensaje({
-        asunto: req.body.asunto,
-        texto: req.body.texto,
-        creador: req.user.id
+        subject: req.body.subject || 'default',
+        text: req.body.text,
+        creator: req.user.id
     });
 
     mensaje.save().then(
-        resultado => {
-            Mensaje.findByIdAndUpdate(req.params.id, {"$push": {respuestas: mensaje.id}}).then(
-                response => res.send({ok: true, result: resultado}),
-                error => res.send({ok: false, error: error})
-            )
+        // resultado => {
+        //     Mensaje.findByIdAndUpdate(req.params.id, {"$push": {responses: mensaje.id}}).then(
+        //         response => res.send({ok: true, result: resultado}),
+        //         error => res.send({ok: false, error: error})
+        //     )
+        // }
+        async resultado => {
+            await Mensaje.findByIdAndUpdate(req.params.id, {"$push": {responses: mensaje.id}});
+            let user = await Usuario.findById(resultado.creator);
+            let respuesta = {...resultado._doc};
+            respuesta.creator = {
+                _id: user.id,
+                name: user.name,
+                surname: user.surname,
+                avatar: user.avatar
+            }
+            console.log(respuesta);
+            res.send({ok: true, result: respuesta});
         },
         error => res.send({ok: false, error: error})
     )    
@@ -47,7 +78,7 @@ router.post('/respuestas/:id', (req, res) => {
 
 //Obtener respuestas de un mensaje
 router.get('/respuestas/:id', (req, res) => {
-    Mensaje.findById(req.params.id).populate('respuestas').then(
+    Mensaje.findById(req.params.id).populate('responses').then(
         resultado => res.send({ok: true, result: resultado}),
         error => res.send({ok: false, error: error})
     )
@@ -56,7 +87,7 @@ router.get('/respuestas/:id', (req, res) => {
 //Obtener mensajes de un tema
 router.get('/tema/:id', (req, res) => {
     //TODO Obtener las respuestas de cada uno de los mensajes
-    Tema.findById(req.params.id).populate('mensajes').then(
+    Tema.findById(req.params.id).populate('messages').then(
         resultado => res.send({ok: true, result: resultado}),
         error => res.send({ok: false, error: error})
     )

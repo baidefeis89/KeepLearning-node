@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 let apartadoSchema = new mongoose.Schema({
-    titulo: {
+    title: {
         type: String,
         required: true,
         trim: true
@@ -10,7 +10,18 @@ let apartadoSchema = new mongoose.Schema({
         type: String,
         required: false,
         trim: true
-    }
+    },
+    messages: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'mensaje',
+        trim: true,
+        match: /^\d{9}$/
+    }],
+    visits: {
+        type: Number,
+        default: 0
+    },
+    order: Number
 });
 
 let Apartado = mongoose.model('apartado', apartadoSchema);

@@ -1,56 +1,82 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
+const fs = require('fs');
 const bcrypt = require('bcrypt');
 
 const router = express.Router();
 const Usuario = require('../models/usuario');
-
 const constantes = require('../constantes');
 
-router.post('/login', (req, res) => {
-    if (!req.body.email || !req.body.password) 
-        res.send({ok: false, error: 'Nombre de usuario y contraseña requerido'})
-    else {
-        Usuario.findOne({email: req.body.email}).then( resultado => {
-            bcrypt.compare(req.body.password, resultado.password).then(
-                response => {
-                    if (response) res.send({ok: true, token: generarToken(resultado.id)});
-                    else res.send({ok: false, error: 'Nombre de usuario o contraseña incorrecto'});
-                }
-            )
-        })
-    }
+router.get('/me', (req, res) => {
+    Usuario.findById(req.user.id).then(
+        result => res.send({ok: true, result: {email: result.email, name: result.name, surname: result.surname, avatar: result.avatar}}),
+        err => res.send({ok: false, error: err})
+    )
 })
 
-router.post('/registro', (req, res) => {
-    if (!req.body.email) res.send({ok: false, error: 'El email es obligatorio'});
-    else if (!req.body.password) res.send({ok: false, error: 'La contraseña es obligatoria'});
-    else if (!req.body.nombre) res.send({ok: false, error: 'El nombre es obligatorio'});
-    else if (!req.body.apellidos) res.send({ok: false, error: 'El apellido es obligatorio'});
-    else {
-        let usuario = new Usuario({
-            email: req.body.email,
-            nombre: req.body.nombre,
-            apellidos: req.body.apellidos,
-            password: req.body.password
+router.get('/:id', (req, res) => {
+    Usuario.findById(req.params.id).then(
+        result => res.send({ok: true, result: {email: result.email, name: result.name, surname: result.surname, avatar: result.avatar}}),
+        err => res.send({ok: false, error: err})
+    )
+})
+
+router.put('/me', (req, res) => {
+    let data = {
+        email: req.body.email,
+        name: req.body.name,
+        surname: req.body.surname
+    };
+    Usuario.findByIdAndUpdate(req.user.id, data).then(
+        result => res.send({ok:true}),
+        err => res.send({ok:false, error: err})
+    )
+})
+
+router.put('/me/avatar', (req, res) => {
+    let user = req.body;
+
+    if (req.files){
+        let fileName = new Date().getTime() + '.jpg';
+
+        req.files.image.mv('./public/img/' + fileName, error => {
+            if (error) res.status(500).send('Error uploading file') 
+
+            user.avatar = fileName; 
         });
-
-        bcrypt.hash(req.body.password, constantes.saltRounds).then( resultado => {
-            usuario.password = resultado;
-           
-            usuario.save().then(
-                resultado => res.send({ok: true, token: generarToken(resultado.id)}),
-                error => res.send({ok: false, error: error})   
-            )
-            
-        })
-
+    } else if (user.avatar){
+        user.avatar = guardarImagen(user.avatar);
     }
+    console.log(user.avatar);
+    Usuario.findByIdAndUpdate(req.user.id, {$set: {avatar: user.avatar}}).then(
+        result => res.send({ok:true}),
+        err => res.send({ok:false, error: err})
+    )
+})
+
+router.put('/me/password', (req, res) => {
+    bcrypt.hash(req.body.password, constantes.saltRounds).then( resultado => {
+        console.log(resultado);
+        Usuario.findByIdAndUpdate(req.user.id, {$set: {password: resultado}}).then(
+            result => {
+                console.log(result);
+                res.send({ok:true})},
+            err => res.send({ok:false, error: err})
+        )  
+    })
 })
 
 module.exports = router;
 
-function generarToken(id) {
-    let token = jwt.sign({id: id}, constantes.secreto, {expiresIn: '1 day'});
-    return token;
+function guardarImagen(image) {
+    image = image.replace(/^data:image\/png;base64,/, "");
+    image = image.replace(/^data:image\/jpg;base64,/, "");
+    image = image.replace(/^data:image\/jpeg;base64,/, "");
+    
+    image = Buffer.from(image, 'base64');
+    
+    let nameFile = new Date().getTime() + '.jpg';
+
+    fs.writeFile('./public/img/' + nameFile, image, err => console.log(err));
+    
+    return nameFile;
 }
